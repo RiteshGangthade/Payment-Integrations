@@ -17,17 +17,38 @@
 
         .payment-card {
             background: #fff;
-            padding: 30px;
+            padding: 40px 30px;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
         }
 
+        .payment-card h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #0f9d58;
+        }
+
         .payment-card h2 {
-            margin-bottom: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
             color: #333;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .input-amount {
+            font-size: 18px;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
         }
 
         .pay-button {
@@ -39,18 +60,44 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .pay-button:hover {
             background-color: #0b7d44;
+        }
+
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+
+        .payment-method {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #555;
         }
     </style>
 </head>
 <body>
 
 <div class="payment-card">
-    <h2>Pay with Razorpay</h2>
-    <p>Click below to make a secure payment of ₹10,000</p>
+    <h1>Welcome to Atharv Milk</h1>
+
+    <div class="section">
+        <h2>Payment Method</h2>
+        <div class="payment-method">Razorpay</div>
+    </div>
+
+    <div class="section">
+        <h2>Enter Amount (₹)</h2>
+        <input type="number" id="amountInput" class="input-amount" placeholder="Enter amount e.g. 10000" min="1" />
+    </div>
+
+    <div class="divider"></div>
+
     <button id="pay-button" class="pay-button">Pay Now</button>
 </div>
 
@@ -58,13 +105,22 @@
 
 <script>
     document.getElementById('pay-button').onclick = function () {
+        const amountInput = document.getElementById('amountInput').value;
+
+        if (!amountInput || isNaN(amountInput) || Number(amountInput) <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        const amountInPaise = Number(amountInput) * 100;
+
         const orderPayload = {
-            amount: 100000, // ₹1000 in paise
+            amount: amountInPaise,
             currency: "INR",
             receipt: "Receipt no. 1",
             notes: {
-                notes_key_1: "Tea, Earl Grey, Hot",
-                notes_key_2: "Tea, Earl Grey… decaf."
+                notes_key_1: "Milk Payment",
+                notes_key_2: "Atharv Dairy"
             }
         };
 
@@ -78,11 +134,11 @@
         .then(response => response.json())
         .then(order => {
             const options = {
-                key: "rzp_test_2th7MnMVq1oav6", // Replace with your Razorpay test key
+                key: "rzp_test_2th7MnMVq1oav6",
                 amount: order.amount,
                 currency: order.currency,
                 name: "Atharv Milk",
-                description: "Test Transaction",
+                description: "Milk Purchase Payment",
                 order_id: order.id,
                 handler: function (response) {
                     alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
