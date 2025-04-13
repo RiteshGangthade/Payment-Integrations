@@ -2,7 +2,10 @@ package com.razorpay.paymentGateway.controller;
 
 import com.razorpay.paymentGateway.dto.OrderRequestDto;
 import com.razorpay.paymentGateway.dto.UpdateOrderRequestDto;
+import com.razorpay.paymentGateway.model.RazorpayOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.razorpay.paymentGateway.service.RazorpayService;
 
@@ -15,17 +18,18 @@ public class RazorpayController {
      private  RazorpayService razorpayService;
 
     @PostMapping("/createOrder")
-    public String createOrder(@RequestBody OrderRequestDto orderRequestDto) {
+    public ResponseEntity<RazorpayOrderResponse> createOrder(@RequestBody OrderRequestDto requestDto) {
         try {
-            return razorpayService.createOrder(
-                    orderRequestDto.getAmount(),
-                    orderRequestDto.getCurrency(),
-                    orderRequestDto.getReceipt(),
-                    orderRequestDto.getNotes()
+            RazorpayOrderResponse response = razorpayService.createOrder(
+                    requestDto.getAmount(),
+                    requestDto.getCurrency(),
+                    requestDto.getReceipt(),
+                    requestDto.getNotes()
             );
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error creating order";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

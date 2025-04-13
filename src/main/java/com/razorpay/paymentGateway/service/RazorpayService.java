@@ -3,6 +3,7 @@ package com.razorpay.paymentGateway.service;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.razorpay.paymentGateway.model.RazorpayOrderResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,17 +21,8 @@ public class RazorpayService {
     @Value("${razorpay.api.secret}")
     private String apiSecret ;
 
-    /**
-     * Creates an order in Razorpay.
-     *
-     * @param amount   The amount to be charged (in paise).
-     * @param currency The currency code (e.g., "INR").
-     * @param receipt  The receipt ID.
-     * @param notes    Additional notes as key-value pairs.
-     * @return The order ID as a string.
-     * @throws RazorpayException If there is an error while creating the order.
-     */
-    public String createOrder(int amount, String currency, String receipt, Map<String, String> notes) throws RazorpayException {
+
+    public RazorpayOrderResponse createOrder(int amount, String currency, String receipt, Map<String, String> notes) throws RazorpayException {
         RazorpayClient razorpayClient = new RazorpayClient(apiKey, apiSecret);
 
         JSONObject orderRequest = new JSONObject();
@@ -47,16 +39,18 @@ public class RazorpayService {
         }
 
         Order order = razorpayClient.orders.create(orderRequest);
-        return order.toString();
+
+        RazorpayOrderResponse response = new RazorpayOrderResponse();
+        response.setOrderId(order.get("id"));
+        response.setAmount(order.get("amount"));
+        response.setCurrency(order.get("currency"));
+        response.setRazorpayKey(apiKey); // only public key is safe to return
+
+        return response;
+       // return order.toString();
     }
 
-    /**
-     * Fetches an order from Razorpay using the order ID.
-     *
-     * @param orderId The ID of the order to fetch.
-     * @return The order details as a string.
-     * @throws RazorpayException If there is an error while fetching the order.
-     */
+
     public String fetchOrder(String orderId) throws RazorpayException {
         RazorpayClient client = new RazorpayClient(apiKey, apiSecret);
         Order order = client.orders.fetch(orderId);
@@ -99,6 +93,10 @@ public class RazorpayService {
 
         Order updatedOrder = client.orders.edit(orderId, updateRequest);
         return updatedOrder.toJson().toString();
+    }
+
+    public String getRazorpayKey() {
+        return apiKey;
     }
 
 

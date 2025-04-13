@@ -114,34 +114,37 @@
 
         const amountInPaise = Number(amountInput) * 100;
 
-        const orderPayload = {
+        // Prepare payload for backend
+        const payload = {
             amount: amountInPaise,
             currency: "INR",
-            receipt: "Receipt no. 1",
+            receipt: "Receipt_" + new Date().getTime(),
             notes: {
-                notes_key_1: "Milk Payment",
-                notes_key_2: "Atharv Dairy"
+                customer_name: "Atharv Milk Customer",
+                purpose: "Milk Purchase"
             }
         };
 
+        // Call backend to create order
         fetch('http://localhost:8080/razorpay/createOrder', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(orderPayload)
+            body: JSON.stringify(payload)
         })
         .then(response => response.json())
         .then(order => {
             const options = {
-                key: "rzp_test_2th7MnMVq1oav6",
+                key: order.razorpayKey, // received from backend
                 amount: order.amount,
                 currency: order.currency,
                 name: "Atharv Milk",
                 description: "Milk Purchase Payment",
-                order_id: order.id,
+                order_id: order.orderId,
                 handler: function (response) {
                     alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+                    // Optionally send the response to backend for verification
                 },
                 theme: {
                     color: "#0f9d58"
